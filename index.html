@@ -194,15 +194,7 @@
     }
 
     /* ANIMAÇÃO SAÍDA */
-    @keyframes flyOut {
-      from { opacity: 1; transform: translateX(0); }
-      to   { opacity: 0; transform: translateX(-40px); }
-    }
 
-    .card-main.fly-out {
-      animation: flyOut 0.28s ease forwards;
-      pointer-events: none;
-    }
 
     @media (max-width: 400px) {
       .card-back { padding: 28px 22px; }
@@ -243,7 +235,7 @@
       { texto: "A pessoa <strong>censura</strong> e <strong>critica as ideias</strong> da equipe durante todas as discussões.", cor: "#A50062" },
       { texto: "A pessoa <strong>nunca é proativa</strong>, especialmente em situações em que todas as pessoas <strong>precisam contribuir</strong> com uma parte.", cor: "#001B71" },
       { texto: "Em <strong>situações de negociação</strong> com outras áreas e colegas de trabalho, a pessoa <strong>é agressiva</strong> em sua abordagem e <strong>impõe seus interesses</strong> perante as demais.", cor: "#003E00" },
-      { texto: "Em sua relação com as <strong>pessoas colegas de trabalho</strong>, a pessoa despreza o que as outras falam, sendo uma <strong>péssima ouvinte</strong> e <strong>sempre interrompendo as outras pessoas</strong>.", cor: "#733909" },
+      { texto: "Em sua relação com as <strong>pessoas do trabalho</strong>, a pessoa despreza o que as outras falam, sendo uma <strong>péssima ouvinte</strong> e <strong>sempre interrompendo as outras pessoas</strong>.", cor: "#733909" },
       { texto: "A pessoa <strong>não apresenta</strong> o <strong>comportamento</strong> de <strong>dono do negócio</strong> e não se compromete com os resultados da empresa.", cor: "#004641" },
       { texto: "A pessoa é <strong>criativa</strong> e constantemente busca um <strong>resultado diferente</strong>.", cor: "#385438" },
       { texto: "A pessoa, além de ser <strong>desorganizada e esquecida</strong>, muitas vezes dispersa a equipe em reuniões importantes.", cor: "#6D3B38" },
@@ -300,14 +292,29 @@
       if (animando) return;
       animando = true;
 
-      cardMain.classList.add("fly-out");
+      // Cria um clone da carta atual para animar a saída
+      const clone = cardMain.cloneNode(true);
+      clone.style.position = "absolute";
+      clone.style.inset = "0";
+      clone.style.zIndex = "20";
+      clone.style.pointerEvents = "none";
+      cardMain.parentNode.appendChild(clone);
 
-      setTimeout(() => {
-        cardMain.classList.remove("fly-out");
-        atual = (atual + 1) % cartas.length;
-        carregaCarta();
-        animando = false;
-      }, 280);
+      // Já carrega a próxima carta por baixo
+      atual = (atual + 1) % cartas.length;
+      carregaCarta();
+
+      // Anima o clone saindo
+      clone.style.transition = "opacity 0.3s ease";
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          clone.style.opacity = "0";
+          setTimeout(() => {
+            clone.remove();
+            animando = false;
+          }, 300);
+        });
+      });
     }
 
     function handleClick() {
