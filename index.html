@@ -242,7 +242,15 @@
       { texto: "A pessoa demonstra <strong>espírito de equipe</strong> e procura <strong>interagir e cooperar</strong> com as demais áreas da organização.", cor: "#876300" }
     ];
 
-    let atual = 0;
+    function embaralhar(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    let baralho = embaralhar([...cartas]);
     let estado = "frente";
     let animando = false;
 
@@ -253,6 +261,8 @@
     const dotsWrap  = document.getElementById("progressDots");
     const stack1    = document.getElementById("stackCard1");
     const stack2    = document.getElementById("stackCard2");
+
+    let atual = 0;
 
     cartas.forEach((_, i) => {
       const d = document.createElement("span");
@@ -269,8 +279,8 @@
     }
 
     function atualizaPilha() {
-      const p1 = cartas[(atual + 1) % cartas.length];
-      const p2 = cartas[(atual + 2) % cartas.length];
+      const p1 = baralho[(atual + 1) % baralho.length];
+      const p2 = baralho[(atual + 2) % baralho.length];
       stack1.style.background = p1.cor;
       stack1.style.opacity = "0.45";
       stack2.style.background = p2.cor;
@@ -278,7 +288,7 @@
     }
 
     function carregaCarta() {
-      const c = cartas[atual];
+      const c = baralho[atual];
       cardFront.style.background = c.cor;
       cardBack.style.background = c.cor;
       backText.innerHTML = c.texto;
@@ -292,7 +302,6 @@
       if (animando) return;
       animando = true;
 
-      // Cria um clone da carta atual para animar a saída
       const clone = cardMain.cloneNode(true);
       clone.style.position = "absolute";
       clone.style.inset = "0";
@@ -300,11 +309,15 @@
       clone.style.pointerEvents = "none";
       cardMain.parentNode.appendChild(clone);
 
-      // Já carrega a próxima carta por baixo
-      atual = (atual + 1) % cartas.length;
+      // Se chegou na última, re-embaralha antes de reiniciar
+      if (atual === baralho.length - 1) {
+        baralho = embaralhar([...cartas]);
+        atual = 0;
+      } else {
+        atual = atual + 1;
+      }
       carregaCarta();
 
-      // Anima o clone saindo
       clone.style.transition = "opacity 0.3s ease";
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
