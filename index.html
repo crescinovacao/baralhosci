@@ -11,30 +11,30 @@
     :root {
       --white: #ffffff;
       --bg: #ffffff;
-      --brown: #210000;
-      --blue-dark: #001B71;
-      --blue: #007BEA;
-      --blue-light: #B3DFFF;
+    }
+
+    html, body {
+      height: 100%;
     }
 
     body {
       font-family: 'Raleway', sans-serif;
       background: var(--bg);
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
     }
 
     .arena {
       width: 100%;
-      max-width: 380px;
-      padding: 32px 20px 28px;
+      max-width: 360px;
+      padding: 24px 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 28px;
+      gap: 24px;
     }
 
     /* DOTS */
@@ -61,76 +61,80 @@
     .stack-wrap {
       width: 100%;
       position: relative;
-      /* altura suficiente para mostrar as camadas */
       height: 0;
       padding-top: 145%;
     }
 
-    /* cada carta é posicionada em cima da outra */
     .card {
       position: absolute;
       inset: 0;
       border-radius: 20px;
       box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+    }
+
+    .card-stack-2 {
+      transform: translate(6px, 6px);
+      z-index: 1;
+    }
+    .card-stack-1 {
+      transform: translate(3px, 3px);
+      z-index: 2;
+    }
+
+    /* carta principal */
+    .card-main {
+      z-index: 10;
+      background: transparent;
+      box-shadow: none;
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
       user-select: none;
     }
 
-    /* cartas de baixo — decorativas */
-    .card-stack-2 {
-      background: #ccc;
-      transform: translate(6px, 6px);
-      z-index: 1;
-    }
-    .card-stack-1 {
-      background: #ddd;
-      transform: translate(3px, 3px);
-      z-index: 2;
-    }
-
-    /* carta principal — cima da pilha */
-    .card-main {
-      z-index: 10;
-      perspective: 1000px;
-      background: transparent;
-      box-shadow: none;
-      cursor: default;
-    }
-
-    .card-inner {
-      width: 100%;
-      height: 100%;
-      position: relative;
-      transform-style: preserve-3d;
-      transition: transform 0.55s cubic-bezier(0.4, 0.2, 0.2, 1);
-      cursor: pointer;
-    }
-
-    .card-inner.flipped {
-      transform: rotateY(180deg);
-    }
-
+    /* FLIP via opacidade — compatível com Safari iOS */
     .card-face {
       position: absolute;
       inset: 0;
       border-radius: 20px;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
       box-shadow: 0 4px 20px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+    }
+
+    .card-front {
+      flex-direction: column;
+      opacity: 1;
+      transform: scale(1);
+      z-index: 2;
+    }
+
+    .card-back {
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 36px 32px;
+      opacity: 0;
+      transform: scale(0.97);
+      z-index: 1;
+    }
+
+    /* estado virado */
+    .card-main.virado .card-front {
+      opacity: 0;
+      transform: scale(0.97);
+      z-index: 1;
+    }
+    .card-main.virado .card-back {
+      opacity: 1;
+      transform: scale(1);
+      z-index: 2;
     }
 
     /* FRENTE */
-    .card-front {
-      flex-direction: column;
-      gap: 0;
-    }
-
-    .card-front .card-logo {
+    .card-logo {
       position: absolute;
       top: 24px;
       left: 0;
@@ -138,45 +142,34 @@
       display: flex;
       justify-content: center;
     }
-
-    .card-front .card-logo img {
+    .card-logo img {
       height: 22px;
       filter: brightness(0) invert(1);
       opacity: 0.9;
     }
 
-    .card-front .card-label {
+    .card-label {
       font-weight: 800;
       font-size: clamp(1.8rem, 8vw, 2.6rem);
       color: var(--white);
       letter-spacing: 0.16em;
       text-transform: uppercase;
       text-align: center;
-      position: relative;
-      z-index: 1;
+      line-height: 1.2;
     }
 
-    .card-front .hint {
+    .hint {
       position: absolute;
       bottom: 22px;
+      left: 0;
+      right: 0;
       text-align: center;
       font-size: 0.75rem;
       color: rgba(255,255,255,0.55);
       font-weight: 500;
-      letter-spacing: 0.06em;
-      z-index: 1;
     }
 
     /* VERSO */
-    .card-back {
-      transform: rotateY(180deg);
-      padding: 36px 32px;
-      flex-direction: column;
-      align-items: flex-start;
-      justify-content: center;
-      gap: 16px;
-    }
-
     .back-title {
       position: absolute;
       top: 24px;
@@ -200,26 +193,18 @@
       font-weight: 800;
     }
 
-    /* ANIMAÇÕES */
+    /* ANIMAÇÃO SAÍDA */
     @keyframes flyOut {
-      from { transform: translateX(0); opacity: 1; }
-      to   { transform: translateX(-40px); opacity: 0; }
+      from { opacity: 1; transform: translateX(0); }
+      to   { opacity: 0; transform: translateX(-40px); }
     }
 
-    .card-main.fly-out .card-inner {
-      animation: flyOut 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    /* INSTRUCAO */
-    .instrucao {
-      text-align: center;
-      font-size: 0.75rem;
-      color: #aaa;
-      letter-spacing: 0.03em;
+    .card-main.fly-out {
+      animation: flyOut 0.28s ease forwards;
+      pointer-events: none;
     }
 
     @media (max-width: 400px) {
-      .arena { padding: 24px 14px 20px; gap: 20px; }
       .card-back { padding: 28px 22px; }
     }
   </style>
@@ -230,30 +215,24 @@
 
     <div class="progress-dots" id="progressDots"></div>
 
-    <div class="stack-wrap" id="stackWrap">
-      <!-- cartas decorativas de baixo -->
+    <div class="stack-wrap">
       <div class="card card-stack-2" id="stackCard2"></div>
       <div class="card card-stack-1" id="stackCard1"></div>
 
-      <!-- carta principal -->
-      <div class="card card-main" id="cardMain">
-        <div class="card-inner" id="cardInner" onclick="handleClick()">
-          <div class="card-face card-front" id="cardFront">
-            <div class="card-logo">
-              <img src="https://i.imgur.com/LU8FtBY.png" alt="Crescimentum">
-            </div>
-            <div class="card-label">Baralho<br>SCI</div>
-            <div class="hint">Toque para revelar</div>
+      <div class="card card-main" id="cardMain" onclick="handleClick()">
+        <div class="card-face card-front" id="cardFront">
+          <div class="card-logo">
+            <img src="https://i.imgur.com/LU8FtBY.png" alt="Crescimentum">
           </div>
-          <div class="card-face card-back" id="cardBack">
-            <div class="back-title">Baralho SCI</div>
-            <div class="back-text" id="backText"></div>
-          </div>
+          <div class="card-label">Baralho<br>SCI</div>
+          <div class="hint">Toque para revelar</div>
+        </div>
+        <div class="card-face card-back" id="cardBack">
+          <div class="back-title">Baralho SCI</div>
+          <div class="back-text" id="backText"></div>
         </div>
       </div>
     </div>
-
-
 
   </div>
 
@@ -272,20 +251,17 @@
     ];
 
     let atual = 0;
-    let estado = "frente"; // "frente" | "verso"
+    let estado = "frente";
     let animando = false;
 
-    const cardMain   = document.getElementById("cardMain");
-    const cardInner  = document.getElementById("cardInner");
-    const cardFront  = document.getElementById("cardFront");
-    const cardBack   = document.getElementById("cardBack");
-    const backText   = document.getElementById("backText");
-    const dotsWrap   = document.getElementById("progressDots");
+    const cardMain  = document.getElementById("cardMain");
+    const cardFront = document.getElementById("cardFront");
+    const cardBack  = document.getElementById("cardBack");
+    const backText  = document.getElementById("backText");
+    const dotsWrap  = document.getElementById("progressDots");
+    const stack1    = document.getElementById("stackCard1");
+    const stack2    = document.getElementById("stackCard2");
 
-    const stack1     = document.getElementById("stackCard1");
-    const stack2     = document.getElementById("stackCard2");
-
-    // Cria dots
     cartas.forEach((_, i) => {
       const d = document.createElement("span");
       d.className = "dot";
@@ -293,22 +269,20 @@
     });
 
     function atualizaDots() {
-      const dots = dotsWrap.querySelectorAll(".dot");
-      dots.forEach((d, i) => {
+      dotsWrap.querySelectorAll(".dot").forEach((d, i) => {
         d.classList.remove("active", "visited");
         if (i === atual) d.classList.add("active");
         else if (i < atual) d.classList.add("visited");
       });
     }
 
-    function atualizaCorPilha() {
-      const prox1 = cartas[(atual + 1) % cartas.length];
-      const prox2 = cartas[(atual + 2) % cartas.length];
-      stack1.style.background = prox1.cor;
-      stack2.style.background = prox2.cor;
-      // deixa as pilhas um pouco mais claras
-      stack1.style.opacity = "0.5";
-      stack2.style.opacity = "0.3";
+    function atualizaPilha() {
+      const p1 = cartas[(atual + 1) % cartas.length];
+      const p2 = cartas[(atual + 2) % cartas.length];
+      stack1.style.background = p1.cor;
+      stack1.style.opacity = "0.45";
+      stack2.style.background = p2.cor;
+      stack2.style.opacity = "0.25";
     }
 
     function carregaCarta() {
@@ -316,18 +290,16 @@
       cardFront.style.background = c.cor;
       cardBack.style.background = c.cor;
       backText.innerHTML = c.texto;
-      // garante frente visível
-      cardInner.classList.remove("flipped");
+      cardMain.classList.remove("virado");
       estado = "frente";
       atualizaDots();
-      atualizaCorPilha();
+      atualizaPilha();
     }
 
     function proximaCarta() {
       if (animando) return;
       animando = true;
 
-      // anima saída
       cardMain.classList.add("fly-out");
 
       setTimeout(() => {
@@ -335,18 +307,15 @@
         atual = (atual + 1) % cartas.length;
         carregaCarta();
         animando = false;
-      }, 300);
+      }, 280);
     }
 
     function handleClick() {
       if (animando) return;
-
       if (estado === "frente") {
-        // vira para mostrar o texto
-        cardInner.classList.add("flipped");
+        cardMain.classList.add("virado");
         estado = "verso";
       } else {
-        // vai para a próxima
         proximaCarta();
       }
     }
@@ -371,12 +340,10 @@
       isDragging = false;
     });
 
-    // teclado
     document.addEventListener("keydown", e => {
       if (e.key === " " || e.key === "Enter") handleClick();
     });
 
-    // init
     carregaCarta();
   </script>
 </body>
